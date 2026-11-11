@@ -1,0 +1,59 @@
+# ACT IV — THE NUMBERS
+#
+# O que faz: uma vez por dia, gera assets/stats.svg e assets/stats-mobile.svg
+#   (os painéis da seção "The Numbers") e faz commit só quando os números mudam.
+#
+# De onde vêm os números: API GraphQL oficial do GitHub (.github/stats/render.py)
+#   - calendário de contribuições dos últimos 12 meses;
+#   - linguagens (bytes de código) dos seus repositórios.
+#   Nada é estimado: se a API falhar, o job falha e os painéis antigos continuam no ar.
+#
+# Contribuições privadas: ative em github.com → Settings → Public profile →
+#   "Include private contributions on my profile". Elas passam a entrar nas
+#   contagens (só os números; nomes de repositórios nunca aparecem).
+#
+# Linguagens de repositórios privados (opcional): crie um token fine-grained
+#   somente leitura (Repository access: All repositories · Metadata: Read) e salve
+#   como secret STATS_TOKEN em Settings → Secrets and variables → Actions.
+#   Sem esse secret, as porcentagens consideram só os repositórios públicos.
+
+name: Update profile stats
+
+on:
+  schedule:
+    - cron: "23 4 * * *"   # todo dia às 01:23 (horário de Brasília)
+  workflow_dispatch:        # permite rodar manualmente em Actions → Run workflow
+
+permissions:
+  contents: write           # necessário apenas para o commit dos painéis
+
+concurrency:
+  group: profile-stats
+  cancel-in-progress: false
+
+jobs:
+  stats:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Gerar painéis
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATS_TOKEN: ${{ secrets.STATS_TOKEN }}
+        # python3 já vem instalado no runner; o script usa só a biblioteca padrão
+        run: python3 .github/stats/render.py --user "${{ github.repository_owner }}" --out assets
+
+      - name: Commit (somente se os números mudaram)
+        run: |
+          if git diff --quiet -- assets/stats.json assets/stats.svg assets/stats-mobile.svg; then
+            echo "Números inalterados — nada a commitar."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/stats.json assets/stats.svg assets/stats-mobile.svg
+          git commit -m "chore(stats): atualiza The Numbers"
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 30" width="820" height="30" role="img" aria-label="divisor">
+<defs><linearGradient id="l" x1="0" x2="1"><stop offset="0" stop-color="#D4AF37" stop-opacity="0"/><stop offset=".5" stop-color="#D4AF37"/><stop offset="1" stop-color="#D4AF37" stop-opacity="0"/></linearGradient></defs>
+<line x1="40" y1="15" x2="384.0" y2="15" stroke="url(#l)" stroke-width="1"/><line x1="436.0" y1="15" x2="780" y2="15" stroke="url(#l)" stroke-width="1"/>
+<path d="M410.0,5 l10,10 l-10,10 l-10,-10z" fill="none" stroke="#D4AF37" stroke-width="1"/>
+<path d="M410.0,10 l5,5 l-5,5 l-5,-5z" fill="#B31320"><animate attributeName="opacity" values="1;.35;1" dur="3.5s" repeatCount="indefinite"/></path>
+<circle cx="370.0" cy="15" r="1.6" fill="#D4AF37"/><circle cx="450.0" cy="15" r="1.6" fill="#D4AF37"/>
+</svg>
